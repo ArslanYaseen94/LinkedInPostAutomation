@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Jobs\PublishLinkedInPost;
 use App\Models\Post;
+use App\Models\PostTemplate;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -14,18 +15,27 @@ class PostController extends Controller
 {
     public function index(): View
     {
-        $posts = Post::query()
+        $query = Post::query()
             ->where('user_id', Auth::id())
-            ->orderByDesc('id')
-            ->limit(100)
-            ->get();
+            ->orderByDesc('id');
+
+        if ($status = request('status')) {
+            $query->where('status', $status);
+        }
+
+        $posts = $query->paginate(20);
 
         return view('posts.index', compact('posts'));
     }
 
     public function create(): View
     {
-        return view('posts.create');
+        $templates = PostTemplate::where('user_id', Auth::id())
+            ->orderByDesc('usage_count')
+            ->limit(6)
+            ->get();
+
+        return view('posts.create', compact('templates'));
     }
 
     public function store(Request $request): RedirectResponse
