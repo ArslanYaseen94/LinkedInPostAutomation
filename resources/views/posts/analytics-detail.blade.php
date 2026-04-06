@@ -1,15 +1,21 @@
-@extends('layouts.app')
+<x-app-layout>
+    <x-slot name="header">
+        <div class="flex items-center justify-between">
+            <h2 class="font-semibold text-xl text-gray-800 leading-tight">
+                📈 Post Analytics Detail
+            </h2>
+            <a href="{{ route('analytics.dashboard') }}"
+               class="inline-flex items-center px-4 py-2 bg-white border border-gray-300 rounded-md font-semibold text-xs text-gray-700 uppercase tracking-widest shadow-sm hover:bg-gray-50">
+                ← Back
+            </a>
+        </div>
+    </x-slot>
 
-@section('content')
-<div class="py-12">
-    <div class="max-w-4xl mx-auto sm:px-6 lg:px-8">
-        <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
-            <div class="p-6 text-gray-900">
-                <div class="mb-6">
-                    <a href="{{ route('analytics.dashboard') }}" class="text-indigo-600 hover:text-indigo-900">← Back to Analytics</a>
-                </div>
-
-                <h2 class="text-2xl font-bold mb-6">Post Details & History</h2>
+    <div class="py-12">
+        <div class="max-w-4xl mx-auto sm:px-6 lg:px-8">
+            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
+                <div class="p-6 text-gray-900">
+                    <h3 class="text-2xl font-bold mb-6 hidden">Post Details & History</h3>
 
                 <!-- Post Content -->
                 <div class="bg-gray-50 p-6 rounded-lg mb-8 border border-gray-200">
@@ -118,5 +124,4 @@
             </div>
         </div>
     </div>
-</div>
-@endsection
+</x-app-layout>

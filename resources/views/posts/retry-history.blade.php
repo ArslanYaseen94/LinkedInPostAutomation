@@ -1,15 +1,21 @@
-@extends('layouts.app')
-
-@section('content')
-<div class="py-12">
-    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="mb-6">
-            <a href="{{ route('posts.index') }}" class="text-indigo-600 hover:text-indigo-900">← Back to Posts</a>
+<x-app-layout>
+    <x-slot name="header">
+        <div class="flex items-center justify-between">
+            <h2 class="font-semibold text-xl text-gray-800 leading-tight">
+                🔄 Retry History - Post #{{ $post->id }}
+            </h2>
+            <a href="{{ route('posts.index') }}"
+               class="inline-flex items-center px-4 py-2 bg-white border border-gray-300 rounded-md font-semibold text-xs text-gray-700 uppercase tracking-widest shadow-sm hover:bg-gray-50">
+                ← Back
+            </a>
         </div>
+    </x-slot>
 
-        <div class="bg-white rounded-lg shadow-lg overflow-hidden">
-            <div class="p-8">
-                <h2 class="text-2xl font-bold text-gray-900 mb-6">Retry History for Post #{{ $post->id }}</h2>
+    <div class="py-12">
+        <div class="max-w-4xl mx-auto sm:px-6 lg:px-8">
+            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
+                <div class="p-6">
+                    <h3 class="text-2xl font-bold text-gray-900 mb-6">Retry History Details</h3>
 
                 <!-- Post Summary -->
                 <div class="mb-8 p-6 bg-gray-50 rounded-lg border border-gray-200">
@@ -124,14 +130,4 @@
             </div>
         </div>
     </div>
-</div>
-
-<style>
-    .line-clamp-3 {
-        display: -webkit-box;
-        -webkit-line-clamp: 3;
-        -webkit-box-orient: vertical;
-        overflow: hidden;
-    }
-</style>
-@endsection
+</x-app-layout>
