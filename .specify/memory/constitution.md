@@ -1,50 +1,53 @@
-# [PROJECT_NAME] Constitution
-<!-- Example: Spec Constitution, TaskFlow Constitution, etc. -->
+# LINKPOSTAUTOMATION Constitution
 
 ## Core Principles
 
-### [PRINCIPLE_1_NAME]
-<!-- Example: I. Library-First -->
-[PRINCIPLE_1_DESCRIPTION]
-<!-- Example: Every feature starts as a standalone library; Libraries must be self-contained, independently testable, documented; Clear purpose required - no organizational-only libraries -->
+### 1) Spec-first, production-minded
+We write/update specs before coding. Every implementation must map to an explicit requirement and include a clear acceptance criteria / test plan.
 
-### [PRINCIPLE_2_NAME]
-<!-- Example: II. CLI Interface -->
-[PRINCIPLE_2_DESCRIPTION]
-<!-- Example: Every library exposes functionality via CLI; Text in/out protocol: stdin/args → stdout, errors → stderr; Support JSON + human-readable formats -->
+### 2) Safety around credentials and automation
+No secrets in git. Tokens/cookies stay in `.env` (never committed). Any automation must have rate limits, retries, and an explicit “dry run” path.
 
-### [PRINCIPLE_3_NAME]
-<!-- Example: III. Test-First (NON-NEGOTIABLE) -->
-[PRINCIPLE_3_DESCRIPTION]
-<!-- Example: TDD mandatory: Tests written → User approved → Tests fail → Then implement; Red-Green-Refactor cycle strictly enforced -->
+### 3) Queue-first for all external calls
+All LinkedIn API/browser automation runs via queued jobs. HTTP requests must be idempotent where possible and resilient (timeouts, exponential backoff, and structured error reporting).
 
-### [PRINCIPLE_4_NAME]
-<!-- Example: IV. Integration Testing -->
-[PRINCIPLE_4_DESCRIPTION]
-<!-- Example: Focus areas requiring integration tests: New library contract tests, Contract changes, Inter-service communication, Shared schemas -->
+### 4) Observability is not optional
+Every run emits structured logs with a correlation id. Store execution history (what was posted, when, status, error) so failures can be re-tried safely.
 
-### [PRINCIPLE_5_NAME]
-<!-- Example: V. Observability, VI. Versioning & Breaking Changes, VII. Simplicity -->
-[PRINCIPLE_5_DESCRIPTION]
-<!-- Example: Text I/O ensures debuggability; Structured logging required; Or: MAJOR.MINOR.BUILD format; Or: Start simple, YAGNI principles -->
+### 5) No 500s for expected user flows
+OAuth errors (invalid scope, user canceled, redirect mismatch, invalid state) must be handled gracefully with user-facing messages and must not crash with a 500.
 
-## [SECTION_2_NAME]
-<!-- Example: Additional Constraints, Security Requirements, Performance Standards, etc. -->
+### 5) Keep it simple, but extensible
+Start with one integration path (API-first). If browser automation is needed, isolate it behind an interface so we can swap implementations without touching business logic.
 
-[SECTION_2_CONTENT]
-<!-- Example: Technology stack requirements, compliance standards, deployment policies, etc. -->
+## Constraints & Security
 
-## [SECTION_3_NAME]
-<!-- Example: Development Workflow, Review Process, Quality Gates, etc. -->
+- Use Laravel 12 + queues + scheduler as the backbone.
+- Never scrape or automate in ways that violate platform terms for the user’s account; add guardrails (per-minute posting limit, account-level disable switch).
+- Sensitive config keys:
+  - `LINKEDIN_CLIENT_ID`, `LINKEDIN_CLIENT_SECRET`, `LINKEDIN_REDIRECT_URI`
+  - Optional: `LINKEDIN_ACCESS_TOKEN` / `LINKEDIN_REFRESH_TOKEN` (or stored encrypted in DB later)
 
-[SECTION_3_CONTENT]
-<!-- Example: Code review requirements, testing gates, deployment approval process, etc. -->
+## Development Workflow
+
+- Prefer small, composable services (`App\\Services\\LinkedIn\\...`).
+- No long-running synchronous controllers for posting; controllers only enqueue work and return immediately.
+- Add a minimal “admin dashboard” page for manual triggering, status viewing, and last-run logs.
+- Add/maintain feature tests for critical auth + OAuth flows.
 
 ## Governance
-<!-- Example: Constitution supersedes all other practices; Amendments require documentation, approval, migration plan -->
 
-[GOVERNANCE_RULES]
-<!-- Example: All PRs/reviews must verify compliance; Complexity must be justified; Use [GUIDANCE_FILE] for runtime development guidance -->
+This constitution is the top-level guidance for this repo. If implementation conflicts with it, update the spec + constitution first, then implement.
 
-**Version**: [CONSTITUTION_VERSION] | **Ratified**: [RATIFICATION_DATE] | **Last Amended**: [LAST_AMENDED_DATE]
-<!-- Example: Version: 2.1.1 | Ratified: 2025-06-13 | Last Amended: 2025-07-16 -->
+**Version**: 2.0.0 | **Ratified**: 2026-03-31 | **Last Amended**: 2026-04-01
+
+### Recent Amendments (v2.0)
+- ✅ Added conditional UI rules (buttons only for drafts)
+- ✅ Added media upload & storage constraints  
+- ✅ Added auto-detecting redirect URI with copy button
+- ✅ Added encryption requirement for LinkedIn secrets
+- ✅ Added status machine & state transitions
+- ✅ Added comprehensive error handling rules
+- ✅ Added queue configuration & retry logic
+- ✅ Added status-gated edit/publish functionality
+- ✅ Added 403 authorization checks for ownership
