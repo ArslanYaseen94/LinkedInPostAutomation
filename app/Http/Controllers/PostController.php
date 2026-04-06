@@ -25,7 +25,7 @@ class PostController extends Controller
 
         $posts = $query->paginate(20);
 
-        return view('posts.index', compact('posts'));
+        return view('posts.index-enhanced', compact('posts'));
     }
 
     public function create(): View
@@ -35,7 +35,7 @@ class PostController extends Controller
             ->limit(6)
             ->get();
 
-        return view('posts.create', compact('templates'));
+        return view('posts.create-enhanced', compact('templates'));
     }
 
     public function store(Request $request): RedirectResponse
