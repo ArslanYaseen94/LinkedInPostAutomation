@@ -15,6 +15,9 @@ class PublishLinkedInPost implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
+    public int $tries = 3;
+    public int $maxExceptions = 3;
+
     public function __construct(public int $postId)
     {
     }
@@ -29,28 +32,44 @@ class PublishLinkedInPost implements ShouldQueue
             return;
         }
 
-        $post->forceFill([
-            'status' => 'queued',
-            'last_error' => null,
-        ])->save();
+        $post->logStatusChange('queued', 'Job processing started');
 
         $response = $client->publishWithImage($user, $post->text, $post->image_path, $post->link_url);
 
         if (($response['ok'] ?? false) === true) {
             $post->forceFill([
-                'status' => 'sent',
-                'sent_at' => now(),
                 'linkedin_urn' => $response['result']['linkedin_urn'] ?? null,
                 'last_error' => null,
             ])->save();
 
+            $post->logStatusChange('sent', 'Successfully published to LinkedIn', null);
+            $post->update(['sent_at' => now()]);
+
             return;
         }
 
-        $post->forceFill([
-            'status' => 'failed',
-            'last_error' => (string) ($response['error'] ?? 'Unknown error'),
-        ])->save();
+        $errorMessage = (string) ($response['error'] ?? 'Unknown error');
+        $post->incrementRetryCount();
+
+        if ($post->canRetry()) {
+            $post->logStatusChange('failed', 'Publishing failed - will retry', $errorMessage);
+            $post->update(['last_error' => $errorMessage]);
+            
+            // Retry the job
+            $this->release(delay: 60); // Wait 60 seconds before retry
+        } else {
+            $post->logStatusChange('failed', 'Publishing failed - max retries exceeded', $errorMessage);
+            $post->update(['last_error' => $errorMessage]);
+        }
+    }
+
+    public function failed(\Throwable $exception): void
+    {
+        $post = Post::query()->find($this->postId);
+        if ($post) {
+            $post->logStatusChange('failed', 'Job exception', $exception->getMessage());
+            $post->update(['last_error' => $exception->getMessage()]);
+        }
     }
 }
 

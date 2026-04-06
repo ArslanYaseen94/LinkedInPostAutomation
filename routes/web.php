@@ -2,6 +2,9 @@
 
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\PostController;
+use App\Http\Controllers\PostAnalyticsController;
+use App\Http\Controllers\PostTemplateController;
+use App\Http\Controllers\PostRetryController;
 use App\Http\Controllers\LinkedInAuthController;
 use App\Http\Controllers\LinkedInCredentialController;
 use Illuminate\Support\Facades\Route;
@@ -22,6 +25,23 @@ Route::middleware('auth')->group(function () {
     Route::put('/posts/{post}', [PostController::class, 'update'])->name('posts.update');
     Route::post('/posts/{post}/publish', [PostController::class, 'publish'])->name('posts.publish');
 
+    // Post Analytics Routes
+    Route::get('/analytics', [PostAnalyticsController::class, 'dashboard'])->name('analytics.dashboard');
+    Route::get('/analytics/{post}', [PostAnalyticsController::class, 'postDetail'])->name('analytics.detail');
+
+    // Post Template Routes
+    Route::get('/templates', [PostTemplateController::class, 'index'])->name('templates.index');
+    Route::get('/templates/create', [PostTemplateController::class, 'create'])->name('templates.create');
+    Route::post('/templates', [PostTemplateController::class, 'store'])->name('templates.store');
+    Route::get('/templates/{template}/edit', [PostTemplateController::class, 'edit'])->name('templates.edit');
+    Route::put('/templates/{template}', [PostTemplateController::class, 'update'])->name('templates.update');
+    Route::delete('/templates/{template}', [PostTemplateController::class, 'destroy'])->name('templates.destroy');
+    Route::post('/templates/{template}/use', [PostTemplateController::class, 'use'])->name('templates.use');
+
+    // Post Retry Routes
+    Route::post('/posts/{post}/retry', [PostRetryController::class, 'retry'])->name('posts.retry');
+    Route::get('/posts/{post}/retry-history', [PostRetryController::class, 'show'])->name('posts.retry-history');
+
     Route::get('/linkedin/credentials', [LinkedInCredentialController::class, 'edit'])->name('linkedin.credentials.edit');
     Route::put('/linkedin/credentials', [LinkedInCredentialController::class, 'update'])->name('linkedin.credentials.update');
 
@@ -34,3 +54,4 @@ Route::middleware('auth')->group(function () {
 });
 
 require __DIR__.'/auth.php';
+
